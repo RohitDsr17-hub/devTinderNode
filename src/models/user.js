@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
     firstName: {
@@ -16,10 +17,20 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true,
+        validate(value) {
+            if(!validator.isEmail(value)) {
+                throw new Error("Inavlid Email Adress" + value);
+            }
+        }
     },
     password: {
         type: String,
-        required: true
+        required: true,
+        validate(value) {
+            if(!validator.isStrongPassword(value)) {
+                throw new Error("Inavlid password" + value);
+            }
+        }
     },
     age: {
         type: Number,
@@ -36,6 +47,11 @@ const userSchema = new mongoose.Schema({
     photoUrl: {
         type: String,
         default: "https://cdn-icons-png.flaticon.com/256/149/149071.png",
+        validate(value) {
+            if(!validator.isURL(value)) {
+                throw new Error("Inavlid photo url" + value);
+            }
+        }
     },
     about: {
         type: String,
@@ -47,6 +63,19 @@ const userSchema = new mongoose.Schema({
 }, {
     timestamps: true,
 });
+
+userSchema.methods.getJWT = async function () {
+    const user = this;
+    const token = await jwt.sign({ _id: user._id }, "Dev@sairam10", { expiresIn: '1h' });
+    return token;
+}
+
+userSchema.methods.validatePassword = async function (passwordInputByUser) {
+    const user = this;
+    const passwordHash = user.password;
+    const token = await bcrypt.compare(passwordInputByUser, passwordHash);
+    return token;
+}
 
 const User = mongoose.model("User", userSchema);
 
