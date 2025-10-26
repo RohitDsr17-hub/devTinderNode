@@ -1,12 +1,13 @@
-const connectDB = require('./config/database');
+require("dotenv").config();
 const express = require('express');
+const connectDB = require('./config/database');
 // const User = require('./models/user');
 const cookieParser = require('cookie-parser');
 const cors = require("cors");
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5176",
     credentials: true,
 }));
 app.use(express.json());
@@ -82,7 +83,7 @@ app.use("/", userRouter);
 
 connectDB().then(() => {
     console.log("Database connection successful");
-    app.listen(3000, () => {
+    app.listen(process.env.PORT, () => {
         console.log("server successfully listening on port 3000");
     });
 }).catch(err => {
